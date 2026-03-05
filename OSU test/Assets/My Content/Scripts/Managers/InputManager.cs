@@ -7,18 +7,29 @@ public class InputManager : MonoBehaviour
     public static Action<ButtonPressed> OnButtonPressedEvent;
     public static Action<ButtonPressed> OnButtonReleasedEvent;
     
-    public void OnButtonPressed(InputAction.CallbackContext context)
+    public void OnButtonPrimaryPressed(InputAction.CallbackContext context)
+    {
+        OnButtonPressed(context, ButtonPressed.Primary);
+    }
+    public void OnButtonSecondaryPressed(InputAction.CallbackContext context)
+    {
+        OnButtonPressed(context, ButtonPressed.Secondary);
+    }
+
+    private void OnButtonPressed(InputAction.CallbackContext context, ButtonPressed value)
     {
         if (context.performed)
         {
-            OnButtonPressedEvent.Invoke(context.ReadValue<ButtonPressed>());
+            OnButtonPressedEvent.Invoke(value);
             
         }
         else if (context.canceled)
         {
-            OnButtonReleasedEvent.Invoke(context.ReadValue<ButtonPressed>());
+            OnButtonReleasedEvent.Invoke(value);
         }
+        
     }
+    
 }
 
 public enum ButtonPressed
