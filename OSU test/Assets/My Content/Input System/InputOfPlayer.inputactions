@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "name": "InputOfPlayer",
+    "maps": [
+        {
+            "name": "InGame",
+            "id": "b5e6741c-3287-4ece-9eb0-c3db92df9035",
+            "actions": [
+                {
+                    "name": "PrimaryButtonPressed",
+                    "type": "Button",
+                    "id": "72f49685-cb25-498d-bd2d-d78b7418af0d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SecondaryButtonPressed",
+                    "type": "Button",
+                    "id": "de84f90f-9d73-43a8-8439-9ac9b1fdc36e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f44d5197-6655-4339-8ecc-798f32587649",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryButtonPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "86176f6d-b25f-4338-9fe7-c7c5c965e329",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SecondaryButtonPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
