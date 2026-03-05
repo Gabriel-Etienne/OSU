@@ -1,55 +1,40 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 
 public class GameManager : MonoBehaviour
 {
     #region Variables
+
+    public static Action ResetGameState;
+    
     
     private Coroutine _coroutinePrimary;
     private Coroutine _coroutineSecondary;
     private Coroutine _coroutineUpdate;
-    public Vector2 limit;
     
+    [Header("Game Settings")]
     [SerializeField] private GameObject _notePrefab;
-
-    [SerializeField] private int _nbNoteDefault = 10;
-    private List<GameObject> _listAvailableNode = new List<GameObject>(); // pulling system
-    private List<GameObject> _listNoteToCheck = new List<GameObject>(); // already in gameplay
-    
-    
-    private Camera _cam;
     [SerializeField] private LayerMask _noteLayer;
+    [SerializeField] private SongManager _songManager;
+    public Vector2 gameLimits =  new Vector2(8, 8);
+    
+    
+    private int _nbNoteDefault = 10;
+    private List<GameObject> _listAvailableNode = new List<GameObject>(); // pulling system
+    private Camera _cam;
 
     #endregion
-
-
-    public Vector2 randomTimerLimit = new Vector2(0.25f,2f);
     
+    // temporary variables
+    public Vector2 randomTimerLimit = new Vector2(0.25f,2f);
     public float timerMax = 1f;
     private float timer = 0f;
-
-    IEnumerator Update()
-    {
-        while (true)
-        {
-            timer +=  Time.deltaTime;
-            if (timer >= timerMax)
-            {
-                float x = Random.Range(-(limit.x/2), limit.x/2);
-                float y = Random.Range(-(limit.y/2), limit.y/2);
-                SpawnNextNoteAt(new Vector2(x, y));
-                timer -= timerMax;
-                timerMax = Random.Range(randomTimerLimit.x , randomTimerLimit.y);
-            }
-            yield return null;
-            
-        }
-    }
-
-
+    
     private void Start()
     {
         _cam = Camera.main;
@@ -60,7 +45,7 @@ public class GameManager : MonoBehaviour
             _listAvailableNode.Add(InstantiateNote());
         }
         
-        _coroutineUpdate = StartCoroutine(Update());
+        _coroutineUpdate = StartCoroutine(UpdateCoroutine());
     }
 
     private GameObject InstantiateNote()
@@ -90,8 +75,6 @@ public class GameManager : MonoBehaviour
         
         newNote.gameObject.SetActive(true); // active la note
         
-        
-        
         newNote.GetComponent<NoteScript>().SpawnNote(1.ToString(), Random.ColorHSV(),position); // spawn la note
     }
 
@@ -110,7 +93,6 @@ public class GameManager : MonoBehaviour
     {
         InputManager.OnButtonPressedEvent -= StartCheck;
         InputManager.OnButtonReleasedEvent -= EndCheck;
-        
     }
     
     private void StartCheck(ButtonPressed buttonPressed)
@@ -175,10 +157,28 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
     }
+    
+    IEnumerator UpdateCoroutine()
+    {
+        while (true)
+        {
+            timer +=  Time.deltaTime;
+            if (timer >= timerMax)
+            {
+                float x = Random.Range(-(gameLimits.x/2), gameLimits.x/2);
+                float y = Random.Range(-(gameLimits.y/2), gameLimits.y/2);
+                SpawnNextNoteAt(new Vector2(x, y));
+                timer -= timerMax;
+                timerMax = Random.Range(randomTimerLimit.x , randomTimerLimit.y);
+            }
+            yield return null;
+            
+        }
+    }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(transform.position, limit);
+        Gizmos.DrawWireCube(transform.position, gameLimits);
     }
 }
