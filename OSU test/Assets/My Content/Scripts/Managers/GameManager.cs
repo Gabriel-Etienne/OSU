@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour
 
             if (hit != null)
             {
-                Debug.Log("Note touchée : " + hit.name);
+                //Debug.Log("Note touchée : " + hit.name);
                 hit.GetComponent<NoteScript>().DespawnNote();
                 
                 break;

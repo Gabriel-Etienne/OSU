@@ -15,7 +15,7 @@ public class NoteScript : MonoBehaviour
     public bool isAlreadyPressed = false;
     
     
-    public static Action<NoteHitState> OnNoteState;
+    public static Action<NoteHitState, Vector3> OnNoteState;
     
     private Coroutine _updateCoroutine; 
     
@@ -60,8 +60,8 @@ public class NoteScript : MonoBehaviour
 
     public void DespawnNote()
     {
-        Debug.Log($"{_noteState}");
-        OnNoteState?.Invoke(_noteState);
+        //Debug.Log($"{_noteState}");
+        OnNoteState?.Invoke(_noteState, transform.position);
         
         gameObject.SetActive(false);
         

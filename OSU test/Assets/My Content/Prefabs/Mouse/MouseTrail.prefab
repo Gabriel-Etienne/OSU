@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1606823862610839260}
   - component: {fileID: 403050352502184841}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Circle (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4101160289941527922}
   - component: {fileID: 5867336805575594597}
-  m_Layer: 0
+  m_Layer: 31
   m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,7 +193,8 @@ GameObject:
   - component: {fileID: 856078163910279125}
   - component: {fileID: 9116911046442919346}
   - component: {fileID: 1496739560598454377}
-  m_Layer: 0
+  - component: {fileID: 5421685620204728884}
+  m_Layer: 31
   m_Name: MouseTrail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -348,3 +349,16 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
+--- !u!210 &5421685620204728884
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6708423663485600698}
+  m_Enabled: 1
+  m_SortingLayerID: 133326111
+  m_SortingLayer: 2
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0

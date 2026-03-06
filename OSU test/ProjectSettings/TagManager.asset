@@ -41,5 +41,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Score
+    uniqueID: 4165485651
+    locked: 0
+  - name: Mouse
+    uniqueID: 133326111
+    locked: 0
   m_RenderingLayers:
   - Default

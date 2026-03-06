@@ -10,21 +10,19 @@ public class UiManager : MonoBehaviour
 
     [Space(20)]
     [Header("Score System")]
+    [SerializeField] private Animator _comboAnimator;
     public TMP_Text comboText;
     private int _combo;
-    [SerializeField] private Animator _comboAnimator;
-    
     public TMP_Text missText;
     private int _miss;
-    
     public TMP_Text lateText;
     private int _late;
-    
     public TMP_Text goodText;
     private int _good;
-    
     public TMP_Text perfectText;
     private int _perf;
+    
+    
     private void Awake()
     {
         musicProgressBar.maxValue = _songManager.MusicLength;
@@ -40,7 +38,7 @@ public class UiManager : MonoBehaviour
         NoteScript.OnNoteState -= GetNoteState;
     }
 
-    private void GetNoteState(NoteHitState noteHitState)
+    private void GetNoteState(NoteHitState noteHitState, Vector3 position)
     {
         switch (noteHitState)
         {
@@ -81,4 +79,6 @@ public class UiManager : MonoBehaviour
     {
         musicProgressBar.value = _songManager.MusicTime;
     }
+
+
 }
