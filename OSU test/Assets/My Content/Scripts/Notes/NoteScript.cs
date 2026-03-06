@@ -58,11 +58,26 @@ public class NoteScript : MonoBehaviour
         _updateCoroutine = StartCoroutine(UpdateNoteStateOverTime());
     }
 
+    private void OnEnable()
+    {
+        GameManager.ResetGameState += ReturnToPull;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.ResetGameState -= ReturnToPull;
+    }
+
     public void DespawnNote()
     {
         //Debug.Log($"{_noteState}");
         OnNoteState?.Invoke(_noteState, transform.position);
-        
+
+        ReturnToPull();
+    }
+
+    private void ReturnToPull()
+    {
         gameObject.SetActive(false);
         
         _gameManager.AddUsedNoteToList(gameObject);
@@ -104,13 +119,17 @@ public class NoteScript : MonoBehaviour
         {
             _noteState = NoteHitState.Perfect;
         }
-        else
+        else if (percentage >= 1f - _gameManager.toleranceGood && percentage < 1f - _gameManager.tolerancePerfect)
         {
             _noteState =  NoteHitState.Good;
         }
+        else
+        {
+            _noteState =  NoteHitState.Miss;
+        }
     }
 
-    private void UpdateNoteState()
+    public void UpdateNoteState()
     {
         // Evaluate curves
         float insideAlpha = _insideAlphaCurve.Evaluate(percentage);

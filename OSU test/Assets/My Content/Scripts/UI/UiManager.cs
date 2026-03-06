@@ -31,13 +31,29 @@ public class UiManager : MonoBehaviour
     private void OnEnable()
     {
         NoteScript.OnNoteState += GetNoteState;
+        GameManager.ResetGameState += ResetScore;
     }
 
     private void OnDisable()
     {
         NoteScript.OnNoteState -= GetNoteState;
+        GameManager.ResetGameState -= ResetScore;
     }
 
+    private void ResetScore()
+    {
+        _combo = 0;
+        _miss = 0;
+        _late = 0;
+        _good = 0;
+        _perf = 0;
+        
+        comboText.text = $"{_combo} X";
+        missText.text = $": {_miss}";
+        lateText.text = $": {_late}";
+        goodText.text = $": {_good}";
+        perfectText.text = $": {_perf}";
+    }
     private void GetNoteState(NoteHitState noteHitState, Vector3 position)
     {
         switch (noteHitState)

@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class SongManager : MonoBehaviour
 {
+    public Partition partition;
+    
     [SerializeField] private AudioSource _musicSource;
     public float MusicTime => _musicSource.time;
     public float MusicLength => _musicSource.clip.length;

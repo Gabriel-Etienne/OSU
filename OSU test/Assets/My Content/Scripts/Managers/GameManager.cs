@@ -5,13 +5,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
-
 public class GameManager : MonoBehaviour
 {
     #region Variables
 
     public static Action ResetGameState;
-    
     
     private Coroutine _coroutinePrimary;
     private Coroutine _coroutineSecondary;
@@ -35,13 +33,24 @@ public class GameManager : MonoBehaviour
     private Camera _cam;
 
     public float ActualTime => _songManager.MusicTime;
+    public List<NoteToSpawn> notesToSpawn => _songManager.partition.notes;
+
+    private int indexNoteToSpawn = 0;
+
+
+    [Header("Song Editor Variables")]
+    public bool isEditing = false;
+
+    private int indexEditor = 1;
+    public float timeBeforeLongNotes = 1f;
+    public float registerFrequencyOnHold = 0.1f;
+    
+    private bool _isPrimaryPressed = false;
+    private bool _isSecondaryPressed = false;
+    
+    public List<NoteToSpawn> _noteToSpawns = new List<NoteToSpawn>();
 
     #endregion
-    
-    // temporary variables
-    public Vector2 randomTimerLimit = new Vector2(0.25f,2f);
-    public float timerMax = 1f;
-    private float timer = 0f;
     
     private void Start()
     {
@@ -55,7 +64,150 @@ public class GameManager : MonoBehaviour
         
         _coroutineUpdate = StartCoroutine(UpdateCoroutine());
     }
+    
+    IEnumerator UpdateCoroutine()
+    {
+        while (true)
+        {
+            if (notesToSpawn.Count > indexNoteToSpawn && ActualTime >= notesToSpawn[indexNoteToSpawn].timeForPerfect - timeBetweenSpawnAndHit)
+            {
+                NoteToSpawn noteToSpawn = notesToSpawn[indexNoteToSpawn];
+                
+                SpawnNextNoteAt(noteToSpawn.position, noteToSpawn.color, notesToSpawn[indexNoteToSpawn].timeForPerfect);
+                
+                indexNoteToSpawn++;
+            }
+            yield return null;
+        }
+    }
 
+
+    #region Event And Functions Linked
+    private void OnEnable()
+    {
+        InputManager.OnButtonPressedEvent += StartCheck;
+        InputManager.OnButtonReleasedEvent += EndCheck;
+        InputManager.OnRestartEvent +=  ResetGame;
+    }
+    private void OnDisable()
+    {
+        InputManager.OnButtonPressedEvent -= StartCheck;
+        InputManager.OnButtonReleasedEvent -= EndCheck;
+        InputManager.OnRestartEvent -=  ResetGame;
+    }
+
+    private void ResetGame()
+    {
+        indexNoteToSpawn = 0;
+        ResetGameState?.Invoke();
+    }
+    private void StartCheck(ButtonPressed buttonPressed)
+    {
+        if (!isEditing) StartCheckNonEditor(buttonPressed);
+        else StartCheckEditor(buttonPressed);
+    }
+    private void EndCheck(ButtonPressed buttonPressed)
+    {
+        if (!isEditing) EndCheckNonEditor(buttonPressed);
+        else EndCheckEditor(buttonPressed);
+    }
+    
+    #endregion
+    
+    #region Editor
+
+    private void StartCheckEditor(ButtonPressed buttonPressed)
+    {
+        if (buttonPressed == ButtonPressed.Primary)
+        {
+            if (_coroutinePrimary != null)
+                StopCoroutine(_coroutinePrimary);
+            
+            _isPrimaryPressed = true;
+            _coroutinePrimary = StartCoroutine(CheckCoroutineEditor(buttonPressed));
+        }
+        else 
+        {
+            if (_coroutineSecondary != null)
+                StopCoroutine(_coroutineSecondary);
+            
+            _isSecondaryPressed = true;
+            _coroutineSecondary = StartCoroutine(CheckCoroutineEditor(buttonPressed));
+        }
+    }
+    
+    private void EndCheckEditor(ButtonPressed buttonPressed)
+    {
+        if (buttonPressed == ButtonPressed.Primary)
+        {
+            _isPrimaryPressed =  false;
+        }
+        else 
+        {
+            _isSecondaryPressed = false;
+        }
+        
+    }
+    
+    private bool IsButtonPressed(ButtonPressed button)
+    {
+        if (button == ButtonPressed.Primary)
+            return _isPrimaryPressed;
+        if (button == ButtonPressed.Secondary)
+            return _isSecondaryPressed;
+
+        return false;
+    }
+    
+    private Vector3 GetMouseWorldPos()
+    {
+        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
+        Vector3 pos = _cam.ScreenToWorldPoint(mouseScreenPos);
+        pos.z = 0f;
+        return pos;
+    }
+    
+    IEnumerator CheckCoroutineEditor(ButtonPressed buttonPressed)
+    {
+        float timePressed = 0f;
+        float timer = 0;
+        float timerBetwewnRegister = 0f;
+
+        int index = indexEditor;
+        indexEditor++;
+        
+        bool isLongNote;
+        
+        List<PosAndTime> positionsAndTimes = new List<PosAndTime>();
+        
+        positionsAndTimes.Add(new PosAndTime(ActualTime, GetMouseWorldPos()));
+        
+        while (IsButtonPressed(buttonPressed))
+        {
+            timer += Time.deltaTime;
+            timerBetwewnRegister += Time.deltaTime;
+
+            if (timerBetwewnRegister >= registerFrequencyOnHold)
+            {
+                positionsAndTimes.Add(new PosAndTime(ActualTime, GetMouseWorldPos()));
+                
+                timerBetwewnRegister -= registerFrequencyOnHold;
+            }
+
+            
+            yield return null;
+        }
+
+        isLongNote = timer >= timeBeforeLongNotes;
+        
+        _noteToSpawns.Add(new NoteToSpawn(positionsAndTimes[0].time, positionsAndTimes[0].position, Random.ColorHSV(), index));
+
+    }
+    
+    #endregion
+    
+    #region Non Editor
+    
     private GameObject InstantiateNote()
     {
         GameObject newNote = Instantiate(_notePrefab);
@@ -77,56 +229,38 @@ public class GameManager : MonoBehaviour
         return newNote;
     }
 
-    public void SpawnNextNoteAt(Vector2 position)
+    public void SpawnNextNoteAt(Vector2 position , Color color, float targetTime)
     {
         GameObject newNote = GetAvailableNote(); // get une note
         
         newNote.gameObject.SetActive(true); // active la note
         
-        newNote.GetComponent<NoteScript>().SpawnNote(1.ToString(), Random.ColorHSV(),position, _songManager.MusicTime, _songManager.MusicTime + timeBetweenSpawnAndHit); // spawn la note
+        newNote.GetComponent<NoteScript>().SpawnNote(1.ToString(), color,position, ActualTime, targetTime); // spawn la note
     }
 
     public void AddUsedNoteToList(GameObject note)
     {
         _listAvailableNode.Add(note);
     }
-
-    private void OnEnable()
-    {
-        InputManager.OnButtonPressedEvent += StartCheck;
-        InputManager.OnButtonReleasedEvent += EndCheck;
-    }
-
-    private void OnDisable()
-    {
-        InputManager.OnButtonPressedEvent -= StartCheck;
-        InputManager.OnButtonReleasedEvent -= EndCheck;
-    }
     
-    private void StartCheck(ButtonPressed buttonPressed)
+    private void StartCheckNonEditor(ButtonPressed buttonPressed)
     {
-        // start coroutine of check 
-
         if (buttonPressed == ButtonPressed.Primary)
         {
             if (_coroutinePrimary != null)
                 StopCoroutine(_coroutinePrimary);
-            _coroutinePrimary = StartCoroutine(CheckCoroutine());
+            _coroutinePrimary = StartCoroutine(CheckCoroutineNonEditor());
         }
         else 
         {
             if (_coroutineSecondary != null)
                 StopCoroutine(_coroutineSecondary);
-            _coroutineSecondary = StartCoroutine(CheckCoroutine());
+            _coroutineSecondary = StartCoroutine(CheckCoroutineNonEditor());
         }
-        
-        Debug.Log($"{buttonPressed} Button pressed");
     }
-
-    private void EndCheck(ButtonPressed buttonPressed)
+    
+    private void EndCheckNonEditor(ButtonPressed buttonPressed)
     {
-        // end coroutine of check 
-        
         if (buttonPressed == ButtonPressed.Primary)
         {
             if (_coroutinePrimary != null)
@@ -139,11 +273,9 @@ public class GameManager : MonoBehaviour
                 StopCoroutine(_coroutineSecondary);
             _coroutineSecondary = null;
         }
-        
-        Debug.Log($"{buttonPressed} Button released");
     }
-
-    IEnumerator CheckCoroutine()
+    
+    IEnumerator CheckCoroutineNonEditor()
     {
         while (true)
         {
@@ -166,24 +298,8 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    IEnumerator UpdateCoroutine()
-    {
-        while (true)
-        {
-            timer +=  Time.deltaTime;
-            if (timer >= timerMax)
-            {
-                float x = Random.Range(-(gameLimits.x/2), gameLimits.x/2);
-                float y = Random.Range(-(gameLimits.y/2), gameLimits.y/2);
-                SpawnNextNoteAt(new Vector2(x, y));
-                timer -= timerMax;
-                timerMax = Random.Range(randomTimerLimit.x , randomTimerLimit.y);
-            }
-            yield return null;
-            
-        }
-    }
-
+    #endregion
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
