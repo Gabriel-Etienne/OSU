@@ -24,9 +24,17 @@ public class GameManager : MonoBehaviour
     public Vector2 gameLimits =  new Vector2(8, 8);
     
     
+    public float timeBetweenSpawnAndHit = 1f;
+    public float toleranceLate = 0.2f;
+    public float tolerancePerfect = 0.2f;
+    public float toleranceGood = 0.5f;
+    
+    
     private int _nbNoteDefault = 10;
     private List<GameObject> _listAvailableNode = new List<GameObject>(); // pulling system
     private Camera _cam;
+
+    public float ActualTime => _songManager.MusicTime;
 
     #endregion
     
@@ -75,7 +83,7 @@ public class GameManager : MonoBehaviour
         
         newNote.gameObject.SetActive(true); // active la note
         
-        newNote.GetComponent<NoteScript>().SpawnNote(1.ToString(), Random.ColorHSV(),position); // spawn la note
+        newNote.GetComponent<NoteScript>().SpawnNote(1.ToString(), Random.ColorHSV(),position, _songManager.MusicTime, _songManager.MusicTime + timeBetweenSpawnAndHit); // spawn la note
     }
 
     public void AddUsedNoteToList(GameObject note)

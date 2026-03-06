@@ -45,20 +45,6 @@ public class InputManager : MonoBehaviour
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     public void OnButtonPrimaryPressed(InputAction.CallbackContext context)
     {
         OnButtonPressed(context, ButtonPressed.Primary);
